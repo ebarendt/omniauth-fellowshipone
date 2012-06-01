@@ -126,10 +126,12 @@ module OmniAuth
 
       def consumer
         # update site with the real URL based on the church name received via
-        # the request parms
-        client_options = options.client_options.merge(:site => options.site.sub(/%CC/, request.params['church_code']))
+        # the omniauth config or the request params
+        church_code = request.params['church_code'] || options.church_code
+        site = church_code ? options.site.sub(/%CC/, church_code) : options.site
+        client_options = options.client_options.merge(:site => site)
         consumer = ::OAuth::Consumer.new(options.consumer_key, options.consumer_secret, client_options)
-        consumer.options[:church_code] = request.params['church_code']
+        consumer.options[:church_code] = church_code
         consumer.http.open_timeout = options.open_timeout if options.open_timeout
         consumer.http.read_timeout = options.read_timeout if options.read_timeout
         consumer
